@@ -1,3 +1,574 @@
 #System Design
-System design is the process of designing the architecture and components of a software system to meet specific business requirements(requrements such as scalability, maintainability, and performanc).
+System design is the process of designing the architecture and components of a software system to meet specific business requirements(requrements such as scalability, maintainability, and performance.
+Goal: Build systems that are scalable, reliable, maintainable, and efficient.
 
+#Software Development life Cycle (SDLC): SDLC is a process followed for software building within a software organization. SDLC consists of a precise plan that describes how to develop, maintain, replace, and enhance specific software. 
+Analyze -> Planning -> Maintain -> Implementing -> Develop 
+Planning -> Defining -> Designing -> Building -> Testing -> Deployment
+
+#Significance of System Design : 
+Ensures the system handles lasrge-scale traffic(Millions of users).
+Helps in choosing the right technolohies(Databases, caching, load balancing)
+Improves reliability (Fault tolerance, disaster recovery).
+Makes system cost effective and efficient.
+
+#Types of System Design:
+
+High-Level Design (HLD) → Big picture architecture (services, databases, APIs, how they connect).
+Low-Level Design (LLD) → Detailed design (classes, DB schema, API contracts, flows inside a service).
+
+Example:
+HLD: Uber has Ride Service, Driver Service, Payment Service, Notification Service.
+LLD: Ride Service has Ride class, Booking table, API = /bookRide.
+
+# System Architecture (HLD)
+Shows components of the system and how they connect.
+
+Key Components:
+API Gateway → Entry point for clients.
+Services (Order Service, Payment Service, Auth Service, etc.).
+Database (SQL/NoSQL).
+Cache (Redis, Memcached) → stores frequently accessed data.
+Message Queue (Kafka, RabbitMQ, SQS) → async processing.
+Monitoring & Logging → track performance, errors.
+
+Example (E-commerce):
+User → API Gateway → Product Service → DB + Cache → Response
+
+#Data Flow
+
+Explains how data moves step by step between components.
+Example Flow:
+
+User → places an order in app.
+API Gateway → forwards to Order Service.
+Order Service → checks Product Service (stock).
+Payment Service → processes transaction.
+Database → saves order.
+Notification Service → sends confirmation.
+Response → “Order Placed” shown to user.
+
+Formula:
+User Request → API → Service → Cache/DB/Queue → Response
+
+#Technology Choices
+Picking the right tools/frameworks based on requirements.
+
+Database:
+  SQL (MySQL, PostgreSQL) → structured data, transactions.
+  NoSQL (MongoDB, Cassandra) → flexible schema, scalability.
+Communication:
+  REST → simple, widely used.
+  gRPC → faster, binary, good for microservices.
+Cache: Redis, Memcached.
+Messaging: Kafka, RabbitMQ, AWS SQS.
+Frontend: React, Angular, Vue.
+Backend: Java (Spring Boot), Python (Django/FastAPI), Node.js.
+Cloud: AWS, Azure, GCP.
+
+Example: Uber might use Redis for location caching, Kafka for ride events, Postgres for transactions.
+
+#Functional vs Non-Functional Requirements
+Define what the system should do vs how well it should do it.
+
+Functional Requirements (FR) = Features : Place an order, make payment, send notification.
+Non-Functional Requirements (NFR) = Quality attributes
+
+Scalability (handle millions of users).
+Availability (system should be up 99.99%).
+Latency (response within 200ms).
+Security (authentication, encryption).
+
+Example:
+FR: “User can book a ride.”
+NFR: “Ride booking API must respond in <200ms.”
+
+#Low-Level Design (LLD)
+Detailed design for developers to implement.
+
+Includes: 
+Class Diagrams (Order, Payment, User).
+Database Schema.
+API Contracts (request/response).
+Sequence Diagrams (flow of operations).
+Error handling, caching, concurrency rules.
+
+Example (Ride Service):
+
+Class: Ride { rideId, driverId, userId, status }
+API: POST /ride/book {userId, pickup, drop}
+DB: rides(ride_id, user_id, driver_id, status, created_at)
+
+
+
+--------------------------------- END ----------------------------------
+
+1. High-Level Design (HLD) 
+HLD is the architectural blueprint of a system that describes its major components, their interactions, and overall structure without detailing their internal workings. 
+High-level design or HLD is an initial step in the development of applications where the overall structure of a system is planned.
+Defines overall structure & components
+Example: User service, database, API gateway, cache layer.
+
+What are the major components (services, databases, caches, load balancers, etc.)?
+How do they communicate with each other?
+Example: For an E-commerce platform:
+Components → User service, Product service, Cart service, Payment service.
+Connections → Frontend ↔ API Gateway ↔ Microservices ↔ Databases.
+
+What HLD Includes
+
+System Architecture Diagram- Components (APIs, databases, caches, services, queues, etc.) How they interact (arrows, protocols, flows).
+Data Flow - Example: User request → API Gateway → Service → Database → Response.
+Technology Choices SQL vs. NoSQL, REST vs. gRPC, Redis for caching, Kafka for messaging, etc.
+Non-Functional Requirements : Scalability, availability, latency, security considerations.
+
+Example of HLD : 
+Client → Load Balancer → Application Servers → Database 
+                       ↘ Cache (Redis)
+Client: User enters a long URL.
+Load Balancer: Distributes requests across servers.
+Application Servers: Generate short link, store/retrieve mappings.
+Database: Stores long ↔ short URL mapping.
+Cache (Redis): Stores frequently used links for faster lookup.
+
+HLD Explanation:
+System is horizontally scalable using multiple servers.
+Cache improves performance for popular links.
+Database ensures persistence and consistency.
+
+#In short, HLD involes
+System Architecture Diagram
+data flow
+technology used
+Non functional requiremnets
+
+Example: For an e-commerce system, HLD shows:
+Components like User Service, Product Service, Payment Service, Database.
+How they interact via APIs.
+Which DB or caching system might be used.
+
+Example: A Ride-Sharing System
+For a ride-sharing app like Uber or Lyft, a High-Level Design would include:
+Major Components:
+User Service: Handles user registrations and profiles.
+Ride Service: Manages ride requests and matches passengers with drivers.
+Payment Service: Securely processes payments.
+Notification Service: Sends real-time alerts to users.
+Database: Stores all system data (users, rides, payments, etc.).
+
+Real World Examples of HLD Decisions
+Netflix transitioned their entire backend from a monolith to microservices (starting with encoding and UI services), completing the migration by 2011 to scale rapidly during high-load events like holiday seasons.
+Uber adopted an event-driven architecture where ride requests, location updates, and fare changes emit events that trigger real-time systems like driver matching, billing, and dynamic pricing.
+Twitter deployed a load-balanced architecture with caching of trending topics and tweets to quickly serve millions of users and handle real-time data flows efficiently.
+
+#System Architecture Components
+
+1. Client / API (Frontend or Mobile App)
+
+What it is: The interface users interact with (web browser, mobile app, or API call).
+Why: It sends requests (e.g., "fetch my Instagram feed") and displays responses.
+Interaction: Communicates with the backend using HTTP/HTTPS, gRPC, or WebSockets.
+Example: User opens YouTube → app sends an API call to fetch recommended videos.
+
+2. API Gateway
+
+What it is: A single entry point for all client requests.
+Why: Routes requests to the correct service, handles authentication, rate limiting, and logging.
+Interaction : Receives requests from Client. Routes them to microservices (via REST, gRPC).
+Example: Netflix API Gateway routes requests → Movie Service, User Service, Recommendation Service.
+
+3. Load Balancer
+
+What it is: Distributes incoming traffic evenly across multiple servers.
+Why: Prevents one server from overloading, improves reliability & scalability.
+Interaction: Client request → Load balancer → Any healthy server. Uses algorithms like Round Robin, Least Connections, IP Hash.
+Example: Amazon.com during Black Friday → millions of requests spread across hundreds of servers.
+
+4. Application Servers / Services
+
+What it is: Core logic that processes requests.
+Why: Contains business logic (e.g., "add to cart", "fetch posts", "send message").
+Interaction: Talks to databases, caches, or other services. Runs behind load balancers.
+Example: In Uber → Ride Service, Payment Service, Driver Matching Service.
+
+5. Databases
+
+What it is: Storage system for structured or unstructured data.
+Types:
+SQL (Relational) → MySQL, PostgreSQL (good for transactions, ACID).
+NoSQL → MongoDB, Cassandra, DynamoDB (good for scalability, flexible schema).
+Why: Stores persistent data like user accounts, orders, posts, logs.
+Interaction: Services query/update DB via SQL or query APIs.
+Example: Amazon → SQL for payments (consistency needed), DynamoDB for product catalog (scalable).
+
+6. Cache
+
+What it is: A fast in-memory storage (e.g., Redis, Memcached). 
+Why: Speeds up repeated queries, reduces database load.
+Interaction: Service first checks cache. If data not found → query DB → store result in cache for future.
+Example: Instagram → Frequently accessed user profiles stored in cache.
+
+7. Message Queue (MQ)
+
+What it is: A system for asynchronous communication between services (Kafka, RabbitMQ, AWS SQS).
+Why: Decouples services, smooths traffic spikes, ensures reliability.
+Interaction:
+Producer (Service A) → sends a message to the queue.
+Consumer (Service B) → processes it later.
+Example: In YouTube → When you upload a video, it goes to a queue for processing (encoding, thumbnail generation) instead of blocking the user.
+
+8. CDN (Content Delivery Network)
+
+What it is: A global network of servers that store cached copies of content.
+Why: Reduces latency by serving users from the nearest server.
+Interaction: Client requests static content (images, videos). CDN delivers it instead of going back to origin server.
+Example: Netflix → Streams video from a CDN node close to you.
+
+9. Monitoring & Logging
+
+What it is: Tools to track system health and errors. (Prometheus, Grafana, ELK stack, CloudWatch).
+Why: Detects issues before they impact users.
+Interaction: Collects logs, metrics, traces → Alerts engineers.
+Example: If Facebook login latency spikes, monitoring triggers an alert.
+
+#How They Interact (Flow Example)
+
+Let’s say a user adds a product to cart on Amazon:
+
+Client (App/Web) → sends Add to Cart request.
+API Gateway → receives and authenticates request.
+Load Balancer → forwards request to one application server
+Cart Service (App Server) → processes request.
+  Checks Cache (Redis) → if product exists.
+  If not → queries Database
+Database → updates user’s cart.
+Message Queue → sends async event (e.g., update recommendations, analytics).
+Response → sent back to user → "Item added successfully".
+Monitoring → logs the request and performance.
+
+#Cache
+
+A cache is a temporary, high-speed storage layer (usually in memory) that stores frequently accessed data so it can be retrieved faster than querying the main database every time.
+Where stored? → In-memory (RAM) using tools like Redis, Memcached.
+Why needed? → Accessing RAM is ~100x faster than accessing disk/database.
+What problem it solves? → Reduces latency (response time) and database load.
+
+#Dataflow
+
+Data Flow describes how data moves through a system — from the user’s action, through different components (APIs, services, databases, queues, caches), and finally back to the user (or another system).
+It shows the path + transformations the data takes as it travels.
+
+Why is Data Flow important?
+
+Helps understand end-to-end system behavior.
+Identifies where latency, bottlenecks, or failures can occur.
+Useful for debugging, scaling, and performance optimization.
+Bridges the gap between HLD (architecture) and LLD (detailed design).
+
+Generic Data Flow (Step-by-step)
+
+User Request → A client (web, mobile, API call) sends input (e.g., “place order”).
+API Gateway / Load Balancer → Routes the request to the correct service.
+Service Layer → Executes the business logic (validates data, applies rules).
+Cache Lookup (if any) → Checks Redis/Memcached for quick response.
+Database Access → Reads/writes from SQL/NoSQL database.
+Message Queue (if async) → Sends events to Kafka, RabbitMQ, or SQS for processing.
+Response → Service prepares output and sends it back to the user.
+
+Example: Food Delivery App (Order Placement Data Flow)
+
+User → places an order in the mobile app.
+API Gateway → forwards request to Order Service.
+Order Service → validates items, checks stock with Restaurant Service.
+Payment Service → processes payment (calls external gateway).
+Database → order record saved (status = CONFIRMED).
+Queue (Kafka) → event published: “OrderConfirmed” → triggers delivery.
+Notification Service → sends SMS/Push to user.
+Response → “Your order has been placed” returned to the user.
+
+Data Flow Example (Diagram Flow)
+User → API Gateway → Order Service → Payment Service → Database
+                ↘ Notification Service (via Queue)
+
+#Technology Used:
+Decides which tools implement each component.
+Example:
+SQL vs NoSQL -> For structured vs unstrutured
+Rest vs gRPC -> for service communication
+Redis -> for caching
+Kafka -> event streaming
+
+#SQL (Structured Query Language) Databases
+
+Definition: SQL databases are relational databases (RDBMS) that store data in tables (rows & columns) with predefined schemas.
+Examples: MySQL, PostgreSQL, Oracle DB, Microsoft SQL Server.
+
+Key Features:
+✅ Structured Data: Data must follow a strict schema.
+✅ ACID Transactions: Ensures reliability (Atomicity, Consistency, Isolation, Durability).
+✅ Strong consistency: Good for applications needing reliable data (e.g., banking, inventory).
+✅ Joins & Relationships: Can connect data between multiple tables.
+
+When to Use:
+Banking, Finance (transactions must be 100% accurate).
+Inventory management.
+Applications with structured and consistent data.
+
+#NoSQL (Not Only SQL) Databases
+
+Definition:
+NoSQL databases are non-relational and allow flexible storage of data without predefined schemas.
+
+Types of NoSQL: 
+
+Document-based → MongoDB, CouchDB.
+(Stores JSON-like documents, flexible fields).
+
+Key-Value stores → Redis, DynamoDB.
+(Super fast, used for caching, sessions).
+
+In-memory, caching -> redis
+
+Column-based → Cassandra, HBase.
+(Optimized for analytics and big data).
+
+Graph-based → Neo4j.
+(Good for relationships, e.g., social networks).
+
+Key Features:
+✅ Schema-less: Can store unstructured/semi-structured data.
+✅ Horizontal Scaling: Easy to distribute across servers.
+✅ High Performance: Great for real-time apps.
+✅ Eventual Consistency: Not always 100% consistent immediately, but highly available.
+
+When to Use:
+Social media apps (flexible user profiles).
+Real-time analytics (log data, IoT).
+Caching and fast lookups.
+E-commerce recommendations.
+
+
+| Feature          | SQL (Relational)                         | NoSQL (Non-Relational)                        |
+| ---------------- | ---------------------------------------- | --------------------------------------------- |
+| **Data Model**   | Tables (rows & columns)                  | Documents, Key-Value, Graph, Columns          |
+| **Schema**       | Fixed schema                             | Dynamic schema (flexible)                     |
+| **Transactions** | ACID (strong consistency)                | BASE (eventual consistency, highly available) |
+| **Scalability**  | Vertical (scale-up: bigger server)       | Horizontal (scale-out: more servers)          |
+| **Best For**     | Banking, finance, ERP, inventory systems | Social media, IoT, analytics, caching         |
+| **Examples**     | MySQL, PostgreSQL, Oracle, SQL Server    | MongoDB, Cassandra, Redis, DynamoDB           |
+
+
+#Non-Functional Requirements 
+Defines how system should work.
+NRF are the quality attributes of a system that describe how the system performs rather than what it does.
+Functional Requirements = What the system does (features).
+👉Non-Functional Requirements (NFRs) = How the system behaves (qualities).
+
+Examples of NFRs
+Here are the most common ones in System Design:
+
+Scalability 
+Can handle 1M users at once
+Ability of the system to handle growing workloads.
+Example: Amazon website handling Black Friday traffic.
+Tech choices: Load balancers, microservices, auto-scaling (AWS EC2, Kubernetes).
+
+Availability
+Ensures system is up & running most of the time (uptime).
+Example: Gmail with 99.99% uptime.
+Tech choices: Multi-region deployment, replication, failover, HAProxy.
+
+Performance / Latency
+Speed of response. Response time for requests.
+Example: Google search must return results in milliseconds.
+Tech choices: Caching (Redis, CDN), efficient queries, optimized APIs.
+
+Reliability
+System works correctly over time, even after failures.
+Example: Banking systems not losing money during crashes.
+Tech choices: Replication, database backups, fault tolerance.
+
+Security
+Protecting data and system from threats.
+Example: End-to-end encrypted chats in WhatsApp.
+Tech choices: HTTPS, OAuth, JWT, IAM (Identity Access Management).
+
+Maintainability
+Ease of fixing bugs, adding new features.
+Example: Modular code in microservices makes changes easier.
+Tech choices: CI/CD pipelines (Jenkins, GitHub Actions), logging, monitoring.
+
+Usability
+User-friendly experience.
+Example: Netflix UI being easy to navigate.
+Tech choices: Good UX/UI frameworks, accessibility standards.
+
+Portability
+Ability to run on multiple platforms/environments.
+Example: An app running on both AWS and Azure.
+Tech choices: Containers (Docker, Kubernetes).
+
+Cost Efficiency
+Keeping infrastructure cost low.
+Example: Using serverless (AWS Lambda) instead of always-on servers.
+
+Observability 
+Ability to monitor and debug.
+
+#Usually map NFR → Tech Choice
+For example:
+
+Scalability → Load balancers, sharding, auto-scaling.
+Availability → Replication, multi-region failover.
+Performance → Caching, CDN, query optimization.
+Security → OAuth2, encryption, IAM.
+
+
+2. Low-Level Design (LLD)
+LLD is the phase of breaking down a high-level architecture into detailed blueprints for implementation. It specifies the granular details of each component, including classes, methods, interfaces, data structures, algorithms, and their interactions, serving as a guide for developers to write the actual code for a software system
+Defines internal logic of components
+Example: Class diagrams, database schema, detailed algorithms.
+The purpose of Low-Level Design is multifaceted, encompassing detailed planning, ensuring implementation accuracy, fostering collaboration, and maintaining system quality and scalability
+
+
+This is the internal details of each component. It answers:
+What does the database schema look like?
+What classes/methods are needed in the code?
+What exact data structures are used?
+Example: For Cart Service:
+Database schema → Cart(cart_id, user_id, items, total_price, created_at)
+Methods → addItem(), removeItem(), calculateTotal()
+
+LLD Involves
+Detailed Blueprint: LLD provides a detailed, actionable plan that transforms abstract high-level design into concrete implementation steps. 
+Component Design: It defines the internal structure of individual modules and components, including their classes, methods, and relationships. 
+Data Structures and Algorithms: LLD specifies the data structures and algorithms to be used, ensuring efficient and correct implementation of functionality. 
+Interfaces and APIs: It outlines the interfaces between components and the formats for API requests and responses. 
+Database Schema: The detailed schema for the database, including tables, indexes, and keys, is designed during the LLD phase. 
+Design Patterns: It incorporates relevant design patterns to ensure code quality, maintainability, and scalability. 
+
+Example:
+For the Payment Service, LLD would include:
+Class diagrams (e.g., PaymentProcessor, TransactionValidator, InvoiceGenerator).
+Detailed function definitions (processPayment(userId, orderId)).
+Error handling, logging, retry mechanisms.
+
+An Example of Low-Level Design (LLD),
+Designing a Library Management System. This example demonstrates how to translate high-level requirements into detailed components, classes, data structures, and their interactions.
+
+Flow of LLD
+
+Understand Requirements & HLD
+Start with functional requirements + non-functional requirements.
+Look at HLD diagrams (components, APIs, databases).
+Example: In an e-commerce system, HLD says → “User Service, Order Service, Payment Service.”
+
+Break Down Each Component into Classes & Modules
+Define classes, interfaces, data models, methods.
+Decide relationships (inheritance, composition, associations).
+Example:
+  User class (id, name, email)
+  Order class (orderId, userId, items)
+  Payment class (paymentId, amount, status)
+
+Define Data Structures
+Which DS to use inside each service (Array, HashMap, Queue, Graph, etc.)
+Example:
+For chat app: HashMap<userId, List<Message>>
+For ride-matching: Priority Queue (closest driver first).
+
+Define APIs / Method Signatures
+What functions will be exposed?
+Inputs, outputs, error handling.
+Example (E-commerce Order Service):
+Order createOrder(User user, List<Item> items);
+Order getOrderById(String orderId);
+boolean cancelOrder(String orderId);
+
+Database Schema (Tables / Collections)
+Tables, columns, relations (ER diagrams).
+SQL or NoSQL schema based on use case.
+Example:
+Order Table: order_id | user_id | total_amount | status
+
+Interactions Between Classes (UML Diagrams)
+Sequence diagrams → Show flow of calls between objects.
+Class diagrams → Show relationships (inheritance, association).
+Example (Login Flow):
+UserController → AuthService → UserRepository → Database
+
+Design Patterns (If needed)
+Design Patterns are reusable solutions to common software design problems.
+They are like blueprints that help you build flexible, maintainable, and scalable systems.
+Apply relevant OOP patterns for flexibility.
+Examples:
+Singleton → DB connection
+Factory → Payment gateway selection
+Observer → Notifications
+
+Design Pattern Types 
+
+1. Creational → Object creation
+Singleton (one instance)
+Factory (object creator)
+Builder (step-by-step creation)
+Prototype (clone)
+
+2. Structural → Class/object structure
+Adapter (convert interface)
+Decorator (add features)
+Facade (simple interface)
+Proxy (stand-in object)
+Composite (tree structure)
+Bridge (decouple layers)
+Flyweight (reuse objects)
+
+3. Behavioral → Object communication
+Observer (pub-sub)
+Strategy (choose algo)
+Command (wrap request)
+Chain of Responsibility (pass along)
+Mediator (central controller)
+State (change by state)
+Iterator (sequential access)
+Template (skeleton algo)
+Memento (save/restore state)
+
+
+Error Handling & Edge Cases
+Define what happens if DB is down, API fails, invalid inputs.
+Example: Retry logic with exponential backoff in Payment API.
+
+Pseudo Code / Class-level Implementation
+Write pseudo code or detailed function flows.
+Not full production code, but detailed enough that devs can implement.
+
+
+#Example Flow: LLD for "Place Order" (E-commerce)
+
+Requirement (FR) → User places an order.
+HLD → Order Service exists.
+LLD →
+Classes: Order, OrderService, OrderRepository.
+APIs: createOrder(), getOrder().
+Data Structures: List of Items, Map of OrderId → Order.
+DB Schema: Order table, OrderItem table.
+Sequence Flow:
+  User → OrderController → OrderService → OrderRepository → DB
+Design Pattern: Factory (for payment method).
+
+
+#Relationship:
+
+HLD + LLD together = System Design.
+HLD is “what components exist and how they interact”.
+LLD is “how exactly each component is built”.
+
+LLD vs. HLD (High-Level Design)
+Scope: HLD focuses on the overall system architecture and major components, while LLD zooms in on the internal details of each component. 
+Abstraction: HLD is an abstract overview, whereas LLD is a concrete, detailed plan that developers use directly for coding. 
+Deliverables: HLD might use diagrams like component diagrams or architecture diagrams, while LLD uses detailed UML diagrams (like class and sequence diagrams), interface specifications, and database schemas. 
+
+
+System Architecture = what components exist.
+Data Flow = how data moves between those components step by step.
